@@ -1,0 +1,18 @@
+# Ignore large media files that exceed GitHub limit
+*.mp4
+*.mov
+*.avi
+
+# Python
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+/dist
+
+# Vite
+.env
