@@ -1,0 +1,310 @@
+/* Neon theme styles for the Innocence Video Lab SPA */
+
+:root {
+  --bg1: #0b0c10;
+  --bg2: #10141f;
+  --panel: rgba(255, 255, 255, 0.05);
+  --panel-strong: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.18);
+  --neon: #64ffda;
+  --neon2: #ff2d95;
+  --text: rgba(255, 255, 255, 0.88);
+  --muted: rgba(255, 255, 255, 0.62);
+  --shadow: 0 26px 56px rgba(0, 0, 0, 0.35);
+  --radius: 18px;
+  --sans: ui-sans-serif, system-ui, -apple-system;
+}
+
+/* ---------------- GLOBAL ---------------- */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: radial-gradient(circle at 20% 10%, rgba(100, 255, 218, 0.18), transparent 55%),
+    radial-gradient(circle at 85% 15%, rgba(255, 45, 149, 0.16), transparent 50%),
+    linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: var(--text);
+  font-family: var(--sans);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 36px;
+}
+
+/* ---------------- BUTTON ---------------- */
+
+.btn {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+  border-color: var(--neon);
+}
+
+/* ---------------- CARD ---------------- */
+
+.card {
+  width: min(720px, 100%);
+  margin: 0 auto 24px;
+  padding: 26px 28px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+}
+
+/* ---------------- LOGIN ---------------- */
+
+.login-page {
+  padding-top: 50px;
+  width: 100%;
+}
+
+.login-card {
+  width: min(460px, 100%);
+  margin: auto;
+  padding: 30px;
+  border-radius: var(--radius);
+  background: rgba(12, 14, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* ---------------- INPUT ---------------- */
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+}
+
+/* ---------------- HEADER ---------------- */
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(960px, 100%);
+  margin: 0 auto 24px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(12, 14, 22, 0.6);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.profile-avatar,
+.profile-avatar-large {
+  background: linear-gradient(135deg, var(--neon2), var(--neon));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  font-weight: bold;
+}
+
+.profile-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  font-size: 28px;
+}
+
+.profile-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.profile-img-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+/* ---------------- PROFILE PAGE ---------------- */
+
+.profile-card {
+  text-align: center;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.logout-btn {
+  background: rgba(255, 45, 149, 0.2);
+  border: 1px solid rgba(255, 45, 149, 0.5);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 45, 149, 0.4);
+}
+
+/* ---------------- UPLOAD ---------------- */
+
+.upload-box {
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.upload-box:hover {
+  border-color: var(--neon);
+}
+
+/* ---------------- HISTORY ---------------- */
+
+.history-item {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+
+/* ---------------- MODAL ---------------- */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  width: min(600px, 90%);
+  background: rgba(10, 12, 20, 0.95);
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  animation: fadeIn 0.4s ease;
+}
+
+/* ---------------- ANIMATIONS ---------------- */
+
+.fade-out {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+
+@media (max-width: 860px) {
+  .app-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* 🔥 MODAL IMPROVED */
+.modal {
+  width: min(650px, 92%);
+  background: linear-gradient(145deg, rgba(10, 12, 20, 0.95), rgba(20, 25, 40, 0.95));
+  padding: 28px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.modal h2 {
+  font-size: 24px;
+  margin-bottom: 14px;
+}
+
+.modal p {
+  margin-bottom: 10px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: #64ffda;
+}
+
+.checkbox-row label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 🔥 BUTTON IMPROVED */
+.modal .btn {
+  margin-top: 20px;
+  width: 100%;
+  font-size: 16px;
+  background: linear-gradient(135deg, #64ffda, #ff2d95);
+  color: #000;
+  font-weight: 700;
+}
+
+.modal .btn:hover {
+  transform: scale(1.02);
+}

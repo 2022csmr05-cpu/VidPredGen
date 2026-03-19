@@ -1,0 +1,238 @@
+/* ================= DASHBOARD PAGE ================= */
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* ================= CONTAINER ================= */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ================= CARD ================= */
+
+.card {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 28px;
+  border-radius: 18px;
+
+  background: linear-gradient(
+    145deg,
+    rgba(20, 25, 40, 0.7),
+    rgba(10, 12, 20, 0.7)
+  );
+
+  border: 1px solid rgba(255,255,255,0.12);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ================= TYPOGRAPHY ================= */
+
+.card h2 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.card p {
+  font-size: 15px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.6;
+}
+
+.meta {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+}
+
+/* ================= UPLOAD ================= */
+
+.upload-box {
+  border: 2px dashed rgba(255,255,255,0.18);
+  border-radius: 16px;
+  padding: 50px 20px;
+  text-align: center;
+  cursor: pointer;
+
+  background: rgba(0,0,0,0.25);
+
+  font-size: 15px;
+  font-weight: 500;
+
+  transition: all 0.25s ease;
+}
+
+.upload-box:hover {
+  border-color: #64ffda;
+  background: rgba(100,255,218,0.08);
+}
+
+/* Hint */
+.hint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ================= BUTTONS ================= */
+
+.card .btn {
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 14px;
+
+  background: linear-gradient(135deg, #64ffda, #ff2d95);
+  color: black;
+  font-weight: 700;
+
+  border: none;
+  border-radius: 999px;
+
+  transition: 0.2s ease;
+}
+
+.card .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(100,255,218,0.25);
+}
+
+/* ================= OPTIONS ================= */
+
+.option-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.option-buttons .btn {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.option-buttons .btn:hover {
+  border-color: #64ffda;
+}
+
+/* ================= OUTPUT ================= */
+
+.output-box {
+  padding: 16px;
+  border-radius: 14px;
+
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* ================= SESSION BANNER ================= */
+
+.session-banner {
+  width: min(900px, 100%);
+  margin-bottom: 18px;
+  padding: 12px 16px;
+
+  border-radius: 14px;
+
+  background: rgba(100,255,218,0.08);
+  border: 1px solid rgba(100,255,218,0.3);
+
+  font-size: 13px;
+  color: #64ffda;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.session-banner button {
+  background: none;
+  border: none;
+  color: #ff2d95;
+  cursor: pointer;
+}
+
+/* ================= HISTORY ================= */
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  padding: 14px;
+  border-radius: 14px;
+
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.12);
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.history-time {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .card {
+    padding: 22px 18px;
+  }
+
+  .upload-box {
+    padding: 35px 15px;
+  }
+}
+
+.preview-container {
+  margin-bottom: 18px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+}
+
+.preview-media {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+}
+
+.preview-info {
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
