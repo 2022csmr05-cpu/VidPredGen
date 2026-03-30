@@ -126,13 +126,36 @@ def load_llava(device):
 
     print("[Task 6] Loading LLaVA model...")
 
-    processor = AutoProcessor.from_pretrained(model_id, use_fast=False)
+    processor_kwargs = {
+        "use_fast": False,
+        "local_files_only": True
+    }
 
-    model = LlavaNextForConditionalGeneration.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16 if device != "cpu" else torch.float32,
-        low_cpu_mem_usage=True
-    )
+    model_kwargs = {
+        "torch_dtype": torch.float16 if device != "cpu" else torch.float32,
+        "low_cpu_mem_usage": True,
+        "use_safetensors": False,
+        "local_files_only": True
+    }
+
+    try:
+        processor = AutoProcessor.from_pretrained(model_id, **processor_kwargs)
+        model = LlavaNextForConditionalGeneration.from_pretrained(
+            model_id,
+            **model_kwargs
+        )
+    except Exception as local_error:
+        print(f"[Task 6] Local cached LLaVA load failed: {local_error}")
+        print("[Task 6] Falling back to Hugging Face download...")
+
+        processor_kwargs["local_files_only"] = False
+        model_kwargs["local_files_only"] = False
+
+        processor = AutoProcessor.from_pretrained(model_id, **processor_kwargs)
+        model = LlavaNextForConditionalGeneration.from_pretrained(
+            model_id,
+            **model_kwargs
+        )
 
     model.config.use_cache = False
 
