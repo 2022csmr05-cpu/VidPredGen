@@ -3,6 +3,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import SummarisationPage from './pages/SummarisationPage';
+import OutputPage from './pages/OutputPage';
 import ProfilePage from './pages/ProfilePage'; // ✅ NEW
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -21,6 +23,24 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/summarise"
+            element={
+              <ProtectedRoute>
+                <SummarisationPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/output"
+            element={
+              <ProtectedRoute>
+                <OutputPage />
               </ProtectedRoute>
             }
           />

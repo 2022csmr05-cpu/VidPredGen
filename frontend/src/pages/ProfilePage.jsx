@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import Disclaimer from '../components/DisclaimerModal';
 import { useAuth } from '../contexts/AuthContext';
 import {
   getHistory,
@@ -26,7 +25,6 @@ export default function ProfilePage() {
   return (
     <div className="dashboard fade-in">
       <Header />
-      <Disclaimer />
 
       <div className="container">
 

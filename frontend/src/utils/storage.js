@@ -3,6 +3,7 @@ const STORAGE_KEYS = {
   HISTORY: 'videoai_history',
   SESSION: 'videoai_session',
   OUTPUT: 'videoai_output',
+  DISCLAIMER: 'acceptedDisclaimer',
 };
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -77,6 +78,29 @@ export function removeSession() {
 
 export function clearAll() {
   Object.values(STORAGE_KEYS).forEach((key) => removeItem(key));
+}
+
+export function isDisclaimerAccepted() {
+  const stored = getItem(STORAGE_KEYS.DISCLAIMER);
+  return stored === true || stored === 'true';
+}
+
+export function acceptDisclaimer() {
+  setItem(STORAGE_KEYS.DISCLAIMER, true);
+}
+
+const SESSION_KEYS = {
+  JUST_LOGGED_IN: 'videoai_just_logged_in',
+};
+
+export function markJustLoggedIn() {
+  sessionStorage.setItem(SESSION_KEYS.JUST_LOGGED_IN, 'true');
+}
+
+export function consumeJustLoggedIn() {
+  const value = sessionStorage.getItem(SESSION_KEYS.JUST_LOGGED_IN);
+  sessionStorage.removeItem(SESSION_KEYS.JUST_LOGGED_IN);
+  return value === 'true';
 }
 
 export function formatTimestamp(timestamp) {

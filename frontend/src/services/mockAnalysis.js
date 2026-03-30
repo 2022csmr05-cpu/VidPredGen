@@ -1,4 +1,4 @@
-export function simulateAnalysis({ type, fileName }) {
+export function simulateAnalysis({ type }) {
   // Returns a Promise that resolves with a mock summary.
   return new Promise((resolve) => {
     const baseText =

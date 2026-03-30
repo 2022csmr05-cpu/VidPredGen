@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 import './LoginPage.css';
@@ -23,21 +23,22 @@ function decodeJwt(token) {
 }
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const { user, login } = useAuth();
+  const location = useLocation();
+  const fromPath = location.state?.from?.pathname || '/dashboard';
+
+  const { login } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
+  // Ensure we don't keep any lingering fade-out classes from prior navigations
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
+    document.body.classList.remove('fade-out');
+  }, []);
+
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   // ✅ Manual Login
   const handleManualLogin = (e) => {
@@ -51,18 +52,14 @@ export default function LoginPage() {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      // 🎬 Smooth transition
-      document.body.classList.add('fade-out');
-
-      setTimeout(() => {
-        login({
-          name: name.trim(),
-          email: email.trim(),
-          type: 'manual',
-        });
-      }, 400);
-    }, 600);
+    login(
+      {
+        name: name.trim(),
+        email: email.trim(),
+        type: 'manual',
+      },
+      fromPath
+    );
   };
 
   // ✅ Google Login Success
@@ -74,21 +71,23 @@ export default function LoginPage() {
       return;
     }
 
-    document.body.classList.add('fade-out');
+    setIsSubmitting(true);
 
-    setTimeout(() => {
-      login({
+    login(
+      {
         name: decoded.name || decoded.given_name || 'Google User',
         email: decoded.email,
         picture: decoded.picture,
         type: 'google',
-      });
-    }, 400);
+      },
+      fromPath
+    );
   };
 
   const handleGoogleError = () => {
     setError('Google Sign-In failed. Try again.');
   };
+
 
   return (
     <div className="page login-page">

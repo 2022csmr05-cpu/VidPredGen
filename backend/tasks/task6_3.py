@@ -98,7 +98,7 @@ even without watching it.
     decoded = processor.batch_decode(output, skip_special_tokens=True)[0]
 
     # ------------------------------------------------------------
-    # 🔥 ONLY FIX: REMOVE PROMPT FROM OUTPUT
+    # ONLY FIX: REMOVE PROMPT FROM OUTPUT
     # ------------------------------------------------------------
     if "SCENE OVERVIEW" in decoded:
         decoded = decoded.split("SCENE OVERVIEW", 1)[-1]

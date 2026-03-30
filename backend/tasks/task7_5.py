@@ -55,6 +55,46 @@ def filter_objects(objects, summary):
     return valid
 
 
+def detect_subject_from_context(summary, objects):
+
+    text = summary.lower()
+
+    subject_keywords = [
+        "waterfall", "river", "stream", "water", "ocean", "wave",
+        "rain", "snow", "cloud", "sky", "forest", "tree",
+        "mountain", "fire", "smoke", "road", "traffic"
+    ]
+
+    for keyword in subject_keywords:
+        if keyword in text:
+            return keyword
+
+    for obj in objects:
+        if obj and obj.lower() in text:
+            return obj.lower()
+
+    return "scene"
+
+
+def has_human_presence(summary, object_data):
+
+    text = summary.lower()
+
+    human_words = [
+        "person", "people", "man", "woman", "child",
+        "face", "facial", "character", "subject"
+    ]
+
+    if any(word in text for word in human_words):
+        return True
+
+    for item in object_data.get("structured", []):
+        if item.get("category") == "human":
+            return True
+
+    return False
+
+
 # ------------------------------------------------------------
 # SAFE PICK
 # ------------------------------------------------------------
@@ -63,7 +103,7 @@ def pick(lst, default):
 
 
 # ------------------------------------------------------------
-# 🔥 ACTION DIVERSIFICATION (NEW FIX)
+# ACTION DIVERSIFICATION (NEW FIX)
 # ------------------------------------------------------------
 def diversify_action(action):
 
@@ -86,7 +126,7 @@ def diversify_action(action):
 # ------------------------------------------------------------
 # SCENE TYPE DETECTION
 # ------------------------------------------------------------
-def detect_scene_type(actions, objects, summary):
+def detect_scene_type(actions, objects, summary, object_data):
 
     text = summary.lower()
 
@@ -94,12 +134,18 @@ def detect_scene_type(actions, objects, summary):
     interaction_words = ["talk", "speak", "smile", "laugh", "react"]
     static_words = ["face", "expression", "close", "still"]
     object_words = ["screen", "ui", "display", "interface", "website"]
+    nature_words = [
+        "waterfall", "river", "stream", "water", "ocean", "wave",
+        "rain", "snow", "cloud", "mist", "forest", "tree",
+        "mountain", "nature", "landscape", "fire", "smoke"
+    ]
 
     scores = {
         "motion": 0,
         "interaction": 0,
         "static": 0,
-        "object": 0
+        "object": 0,
+        "natural_flow": 0
     }
 
     for word in motion_words:
@@ -118,10 +164,23 @@ def detect_scene_type(actions, objects, summary):
         if word in text:
             scores["object"] += 2
 
+    for word in nature_words:
+        if word in text:
+            scores["natural_flow"] += 3
+
+    grouped_objects = object_data.get("grouped", {})
+    if grouped_objects.get("human"):
+        scores["interaction"] += 2
+    else:
+        scores["static"] = max(0, scores["static"] - 2)
+
+    if any(obj.lower() in nature_words for obj in objects):
+        scores["natural_flow"] += 2
+
     scene_type = max(scores, key=scores.get)
 
     if scores[scene_type] == 0:
-        scene_type = "general"
+        scene_type = "natural_flow" if not has_human_presence(summary, object_data) else "general"
 
     print("[Scene Type Scores]:", scores)
     print("[Detected Scene Type]:", scene_type)
@@ -159,12 +218,14 @@ def future_prediction_7_5(
 
     raw_objects = [obj["label"] for obj in object_data_7_2.get("structured", [])]
     objects = filter_objects(raw_objects, summary_6_3)
+    human_present = has_human_presence(summary_6_3, object_data_7_2)
+    detected_subject = detect_subject_from_context(summary_6_3, objects)
 
     main_action = diversify_action(pick(actions, "move"))
     alt_action = diversify_action(pick(actions[1:], "change direction"))
     main_object = pick(objects, "environment")
 
-    scene_type = detect_scene_type(actions, objects, summary_6_3)
+    scene_type = detect_scene_type(actions, objects, summary_6_3, object_data_7_2)
 
     options = []
 
@@ -197,13 +258,22 @@ def future_prediction_7_5(
 
     elif scene_type == "static":
 
-        options.extend([
-            "A subtle change in expression occurs.",
-            "The subject shifts gaze slightly.",
-            "A blink or minor facial movement happens.",
-            "The expression changes to reflect a different emotion.",
-            "A small head movement alters the framing.",
-        ])
+        if human_present:
+            options.extend([
+                "A subtle change in expression occurs.",
+                "The subject shifts gaze slightly.",
+                "A blink or minor facial movement happens.",
+                "The expression changes to reflect a different emotion.",
+                "A small head movement alters the framing.",
+            ])
+        else:
+            options.extend([
+                f"The {detected_subject} remains steady while subtle visual changes emerge.",
+                f"The framing around the {detected_subject} shifts slightly.",
+                "Ambient motion becomes more noticeable in the scene.",
+                "Lighting or texture changes gently over the moment.",
+                "The scene stays calm, with a small environmental variation.",
+            ])
 
     elif scene_type == "object":
 
@@ -214,6 +284,34 @@ def future_prediction_7_5(
             "An interaction modifies the current state.",
             "The system responds to an input.",
         ])
+
+    elif scene_type == "natural_flow":
+
+        if detected_subject == "waterfall":
+            options.extend([
+                "The waterfall continues cascading, with the flow becoming slightly stronger.",
+                "More mist forms around the waterfall as the water crashes below.",
+                "The waterfall maintains its flow while nearby ripples spread outward.",
+                "The stream beneath the waterfall becomes more turbulent for a moment.",
+                "The waterfall's movement stays steady as the surrounding spray thickens.",
+                "The camera could follow the falling water downward toward the pool below.",
+            ])
+        elif detected_subject in {"river", "stream", "water", "ocean", "wave"}:
+            options.extend([
+                f"The {detected_subject} continues flowing with a slight change in intensity.",
+                f"Small ripples build across the {detected_subject} as motion carries forward.",
+                f"The movement of the {detected_subject} becomes briefly more turbulent.",
+                f"The {detected_subject} keeps its rhythm while reflections shift across the surface.",
+                "Spray, foam, or surface texture becomes more visible as the scene develops.",
+            ])
+        else:
+            options.extend([
+                f"The {detected_subject} continues naturally with a subtle shift in motion.",
+                f"The scene around the {detected_subject} becomes slightly more dynamic.",
+                "Ambient movement builds gradually in the environment.",
+                "Natural textures and motion become more pronounced over time.",
+                "The scene evolves gently while preserving the same setting.",
+            ])
 
     else:
 

@@ -1,5 +1,5 @@
 # ============================================================
-# TASK 6.1 : TEMPORAL CONTEXT (YOLO-GROUNDED BLIP CAPTIONING)
+# TASK 6.1 : TEMPORAL CONTEXT (IMAGE + VIDEO SUPPORT)
 # ============================================================
 
 import numpy as np
@@ -14,7 +14,6 @@ from transformers import BlipProcessor, BlipForConditionalGeneration
 # ------------------------------------------------------------
 # LOAD BLIP
 # ------------------------------------------------------------
-
 def load_blip(device):
 
     print("[Task 6.1] Loading BLIP model...")
@@ -39,7 +38,6 @@ def load_blip(device):
 # ------------------------------------------------------------
 # YOLO OBJECT DETECTION
 # ------------------------------------------------------------
-
 def detect_objects(frame, yolo_model):
 
     results = yolo_model(frame)[0]
@@ -50,7 +48,6 @@ def detect_objects(frame, yolo_model):
 
         cls = int(box.cls[0])
         label = yolo_model.names[cls]
-
         objects.add(label)
 
     return list(objects)
@@ -59,7 +56,6 @@ def detect_objects(frame, yolo_model):
 # ------------------------------------------------------------
 # BLIP CAPTION
 # ------------------------------------------------------------
-
 def caption_frame(frame, processor, model, device):
 
     resized = cv2.resize(frame, (384, 384))
@@ -68,7 +64,6 @@ def caption_frame(frame, processor, model, device):
     inputs = processor(images=image, return_tensors="pt").to(device)
 
     with torch.no_grad():
-
         output = model.generate(
             **inputs,
             max_new_tokens=25
@@ -90,7 +85,6 @@ def caption_frame(frame, processor, model, device):
 # ------------------------------------------------------------
 # CLEAN CAPTION
 # ------------------------------------------------------------
-
 def clean_caption(caption):
 
     if caption is None:
@@ -99,12 +93,12 @@ def clean_caption(caption):
     words = caption.split()
 
     if len(words) < 3:
-        return None
+        return caption  # 🔥 do not discard for images
 
     unique_ratio = len(set(words)) / max(len(words), 1)
 
     if unique_ratio < 0.45:
-        return None
+        return caption  # 🔥 relaxed
 
     cleaned = []
     prev = None
@@ -120,7 +114,6 @@ def clean_caption(caption):
 # ------------------------------------------------------------
 # EXTRACT ACTION FROM BLIP
 # ------------------------------------------------------------
-
 def extract_action(caption):
 
     if caption is None:
@@ -138,7 +131,7 @@ def extract_action(caption):
     action_words = [t for t in tokens if t not in banned_words]
 
     if len(action_words) == 0:
-        return None
+        return caption  # 🔥 fallback
 
     return " ".join(action_words[:6])
 
@@ -146,7 +139,6 @@ def extract_action(caption):
 # ------------------------------------------------------------
 # BUILD FINAL CAPTION
 # ------------------------------------------------------------
-
 def grounded_caption(blip_caption, objects):
 
     action_text = extract_action(blip_caption)
@@ -168,7 +160,6 @@ def grounded_caption(blip_caption, objects):
 # ------------------------------------------------------------
 # MERGE CONTEXT
 # ------------------------------------------------------------
-
 def merge_summaries(previous_summary, new_caption):
 
     if new_caption is None:
@@ -193,7 +184,6 @@ def merge_summaries(previous_summary, new_caption):
 # ------------------------------------------------------------
 # MAIN FUNCTION
 # ------------------------------------------------------------
-
 def sample_frames_for_understanding(
         frames,
         fps,
@@ -202,22 +192,42 @@ def sample_frames_for_understanding(
 
     print("\n[Task 6.1] Starting Frame Sampling Controller...")
 
-    task_start_time = time.time()
-
     total_frames = len(frames)
+
+    processor, model = load_blip(device)
+
+    # =========================================================
+    # IMAGE MODE (IMPORTANT FIX)
+    # =========================================================
+    if total_frames == 1:
+
+        print("[Task 6.1] Image input detected")
+
+        frame = frames[0]
+
+        blip_caption = caption_frame(frame, processor, model, device)
+        cleaned = clean_caption(blip_caption)
+        objects = detect_objects(frame, yolo_model)
+
+        final_caption = grounded_caption(cleaned, objects)
+
+        print(f"[Image Caption] {blip_caption}")
+        print(f"[Objects] {objects}")
+        print(f"[Final] {final_caption}")
+
+        return final_caption, frames
+
+
+    # =========================================================
+    # VIDEO MODE (UNCHANGED)
+    # =========================================================
+
     video_seconds = total_frames / fps
 
     print(f"[Task 6.1] Video Length: {video_seconds:.2f} seconds")
 
-    processor, model = load_blip(device)
-
     if video_seconds <= 5:
         return None, frames
-
-
-    # ------------------------------------------------------------
-    # SPLIT VIDEO
-    # ------------------------------------------------------------
 
     last_5_frame_count = int(fps * 5)
 
@@ -227,38 +237,27 @@ def sample_frames_for_understanding(
     print(f"[Task 6.1] Early frames: {len(early_frames)}")
     print(f"[Task 6.1] Last 5 seconds frames: {len(last_5_seconds_frames)}")
 
-
-    # ------------------------------------------------------------
-    # SAMPLE FRAMES
-    # ------------------------------------------------------------
-
     step = int(fps)
 
     context_frames = []
 
     for i in range(0, len(early_frames), step):
-
         frame = early_frames[i]
-
         if isinstance(frame, np.ndarray):
             context_frames.append(frame)
 
     print(f"[Task 6.1] Context frames sampled: {len(context_frames)}")
 
-
     final_context_summary = None
 
     print("\n[Task 6.1] Generating context summary...")
-
 
     for i, frame in enumerate(context_frames):
 
         start = time.time()
 
         blip_caption = caption_frame(frame, processor, model, device)
-
         cleaned = clean_caption(blip_caption)
-
         objects = detect_objects(frame, yolo_model)
 
         caption = grounded_caption(cleaned, objects)
@@ -272,7 +271,6 @@ def sample_frames_for_understanding(
         print(f"[Objects] {objects}")
         print(f"[Summary] {caption}")
         print(f"[Frame Time] {time.time()-start:.2f} sec")
-
 
     print("\n[Task 6.1] Context Summary Completed")
 

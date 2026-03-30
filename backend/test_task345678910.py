@@ -23,7 +23,7 @@ from tasks.task7_5 import future_prediction_7_5
 # TASK 8, 9, 10
 from tasks.task8 import select_future_option
 from tasks.task9 import generate_prompt_from_selection
-from tasks.task10 import generate_future_video
+from tasks.task10_11 import generate_future_video
 
 
 def main():
@@ -74,15 +74,31 @@ def main():
     print(context_summary)
 
     # =====================================================
-    # TASK 6.2
+    # TASK 6.2 (SKIP FOR IMAGE)
     # =====================================================
+
     processor, model = load_llava(device)
 
-    video_output = task6_test(
-        last_frames,
-        yolo_model,
-        device=device
-    )
+    # Detect image input
+    is_image_input = (len(frames) == 1)
+
+    if is_image_input:
+        print("\n[INFO] Image input detected → Skipping Task 6.2")
+
+        video_output = {
+            "video_summary": context_summary,
+            "detected_objects": [],
+            "motion_level": "static",
+            "frames_analyzed": 1,
+            "model": "blip-only"
+        }
+
+    else:
+        video_output = task6_test(
+            last_frames,
+            yolo_model,
+            device=device
+        )
 
     # =====================================================
     # TASK 6.3
