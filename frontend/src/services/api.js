@@ -1,5 +1,11 @@
 const BASE_URL = import.meta.env.VITE_API_BASE || "";
 
+export function resolveApiUrl(path = "") {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${BASE_URL}${path}`;
+}
+
 export async function analyzeFile(file) {
   const formData = new FormData();
   formData.append("file", file);
@@ -41,5 +47,10 @@ export async function generateVideo({ analysisId, optionId }) {
     throw new Error(text || "Failed to generate video.");
   }
 
-  return res.json();
+  const data = await res.json();
+
+  return {
+    ...data,
+    outputUrl: resolveApiUrl(data.outputUrl),
+  };
 }

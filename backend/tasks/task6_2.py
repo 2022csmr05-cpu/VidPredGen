@@ -122,7 +122,7 @@ def chunk_is_similar(prev_chunk, curr_chunk, prev_objects, curr_objects, prev_mo
 
 def load_llava(device):
 
-    model_id = "llava-hf/llava-v1.6-mistral-7b-hf"
+    model_id = os.getenv("LLAVA_MODEL_ID", "llava-hf/llava-v1.6-mistral-7b-hf")
 
     print("[Task 6] Loading LLaVA model...")
 
@@ -134,7 +134,6 @@ def load_llava(device):
     model_kwargs = {
         "torch_dtype": torch.float16 if device != "cpu" else torch.float32,
         "low_cpu_mem_usage": True,
-        "use_safetensors": False,
         "local_files_only": True
     }
 
@@ -151,11 +150,18 @@ def load_llava(device):
         processor_kwargs["local_files_only"] = False
         model_kwargs["local_files_only"] = False
 
-        processor = AutoProcessor.from_pretrained(model_id, **processor_kwargs)
-        model = LlavaNextForConditionalGeneration.from_pretrained(
-            model_id,
-            **model_kwargs
-        )
+        try:
+            processor = AutoProcessor.from_pretrained(model_id, **processor_kwargs)
+            model = LlavaNextForConditionalGeneration.from_pretrained(
+                model_id,
+                **model_kwargs
+            )
+        except Exception as remote_error:
+            raise RuntimeError(
+                f"Failed to load LLaVA model '{model_id}'. "
+                "This checkpoint is published as sharded safetensors, so "
+                "the environment must support safetensors loading."
+            ) from remote_error
 
     model.config.use_cache = False
 
@@ -258,7 +264,7 @@ def merge_summaries(previous, new):
 # MAIN FUNCTION
 # ------------------------------------------------------------
 
-def task6_test(frames, yolo_model, device="cpu"):
+def task6_test(frames, yolo_model, device="cpu", processor=None, model=None):
 
     print("\n[Task 6_2] Starting video understanding")
 
@@ -268,7 +274,8 @@ def task6_test(frames, yolo_model, device="cpu"):
 
     print(f"Total chunks: {len(chunks)}")
 
-    processor, model = load_llava(device)
+    if processor is None or model is None:
+        processor, model = load_llava(device)
 
     rolling_summary = None
     prev_chunk = None

@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { getSession, setSession } from '../utils/storage';
-import { generateVideo } from '../services/api';
+import { generateVideo, resolveApiUrl } from '../services/api';
 
 export default function OutputPage() {
   const navigate = useNavigate();
   const session = getSession();
 
   const [prediction, setPrediction] = useState(session?.prediction || '');
-  const [outputUrl, setOutputUrl] = useState(session?.outputUrl || '');
+  const [outputUrl, setOutputUrl] = useState(() => resolveApiUrl(session?.outputUrl || ''));
   const [selectedOption, setSelectedOption] = useState(session?.selectedOption || null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
@@ -57,17 +57,27 @@ export default function OutputPage() {
   };
 
   const handleDownload = () => {
-    if (!prediction) return;
+    if (!outputUrl) return;
 
-    const blob = new Blob([prediction], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `output-${Date.now()}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    fetch(outputUrl)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Failed to download video.');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `output-${Date.now()}.mp4`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      })
+      .catch((err) => {
+        setError(err?.message || 'Failed to download video.');
+      });
   };
 
   return (
@@ -98,8 +108,15 @@ export default function OutputPage() {
 
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                     <a className="btn" href={outputUrl} target="_blank" rel="noopener noreferrer">
-                      View / Download Video
+                      Open Video
                     </a>
+                    <button
+                      className="btn"
+                      style={{ background: 'rgba(255,255,255,0.12)' }}
+                      onClick={handleDownload}
+                    >
+                      Download Video
+                    </button>
                     <button
                       className="btn"
                       style={{ background: 'rgba(255,255,255,0.12)' }}

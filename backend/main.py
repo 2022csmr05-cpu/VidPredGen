@@ -6,10 +6,12 @@ import os
 import threading
 import uuid
 from pathlib import Path
+from typing import Optional
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 from .pipeline import generate_video_for_analysis, run_analysis
 from .tasks.task3 import load_media
@@ -36,6 +38,11 @@ app.add_middleware(
 
 # In-memory job store; simple and non-persistent.
 JOBS = {}
+
+
+class GenerateRequest(BaseModel):
+    analysisId: str
+    optionId: int
 
 
 def _run_analysis_job(job_id: str):
@@ -117,8 +124,22 @@ def status(analysis_id: str):
 
 
 @app.post("/api/generate")
-def generate(analysisId: str, optionId: int):
+def generate(
+    payload: Optional[GenerateRequest] = Body(default=None),
+    analysisId: Optional[str] = None,
+    optionId: Optional[int] = None,
+):
     """Generate an output video for a selected future option."""
+    if payload is not None:
+        analysisId = payload.analysisId
+        optionId = payload.optionId
+
+    if not analysisId or optionId is None:
+        raise HTTPException(
+            status_code=422,
+            detail="analysisId and optionId are required",
+        )
+
     job = JOBS.get(analysisId)
     if not job or job.get("status") != "done":
         raise HTTPException(status_code=400, detail="Analysis not completed or job not found")
@@ -140,7 +161,11 @@ def get_output(filename: str):
     file_path = OUTPUT_DIR / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(str(file_path), media_type="video/mp4")
+    return FileResponse(
+        str(file_path),
+        media_type="video/mp4",
+        filename=filename,
+    )
 
 
 if __name__ == "__main__":

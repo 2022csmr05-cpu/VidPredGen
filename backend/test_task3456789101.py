@@ -97,7 +97,9 @@ def main():
         video_output = task6_test(
             last_frames,
             yolo_model,
-            device=device
+            device=device,
+            processor=processor,
+            model=model
         )
 
     # =====================================================

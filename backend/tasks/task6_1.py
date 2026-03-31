@@ -234,6 +234,18 @@ def sample_frames_for_understanding(
     early_frames = frames[:-last_5_frame_count]
     last_5_seconds_frames = frames[-last_5_frame_count:]
 
+    # Keep the final analysis window small enough for multimodal inference
+    # on MPS/CPU while preserving temporal coverage across the last 5 seconds.
+    max_tail_frames = 16
+    if len(last_5_seconds_frames) > max_tail_frames:
+        sample_indices = np.linspace(
+            0,
+            len(last_5_seconds_frames) - 1,
+            num=max_tail_frames,
+            dtype=int
+        )
+        last_5_seconds_frames = [last_5_seconds_frames[i] for i in sample_indices]
+
     print(f"[Task 6.1] Early frames: {len(early_frames)}")
     print(f"[Task 6.1] Last 5 seconds frames: {len(last_5_seconds_frames)}")
 

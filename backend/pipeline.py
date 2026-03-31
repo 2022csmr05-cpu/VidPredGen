@@ -97,7 +97,9 @@ def main():
         video_output = task6_test(
             last_frames,
             yolo_model,
-            device=device
+            device=device,
+            processor=processor,
+            model=model
         )
 
     # =====================================================
@@ -288,7 +290,9 @@ def run_analysis(video_path, device=None, status_callback=None):
         video_output = task6_test(
             last_frames,
             yolo_model,
-            device=device
+            device=device,
+            processor=processor,
+            model=model
         )
 
     progress(65)
